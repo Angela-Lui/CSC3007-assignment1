@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <!--Provides an HTTP header for the information/value of content attribute-->
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    
+        <!--Setting the viewport to make website look good on all devices-->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+        <!--Google Fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Dosis:400,700" rel="stylesheet" type="text/css"/>
+        
+        <!--Specifies the URL of external script file (absolute URL)-->
+        <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="https://momentjs.com/downloads/moment.js"></script>
+
+        <!--Title of HTML Page-->
+        <title>Pollutant Standards Index (PSI)</title>
+
+        <style>
+            .main-body{
+                margin: 0 auto;
+                width: 80%;
+                padding: 10px;
+            }
+    
+            h1{
+                text-align: center;
+            }
+    
+            body{
+                text-align: center;
+                color: black;
+                background: #FFFAF0;
+            }
+    
+            table{
+                border-collapse: collapse;
+                border-spacing: 0.5rem;
+                width: 100%;
+            }
+    
+            th, td{
+                border: 1.5px solid black;
+                text-align: center;
+                padding: 6px;
+            }
+    
+            th{
+                background:#778899;
+                color: white;
+            }
+            .large-header {
+                position: relative;
+                width: 100%;
+                background: #111;
+                overflow: hidden;
+                background-size: cover;
+                background-position: center center;
+                z-index: 1;
+            }
+    
+            .demo .large-header {
+            background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/499416/demo-bg.jpg");
+            }
+    
+            .main-title {
+                position: absolute;
+                margin: 0;
+                padding: 0;
+                color: #F9F1E9;
+                text-align: center;
+                top: 50%;
+                left: 50%;
+                -webkit-transform: translate3d(-50%, -50%, 0);
+                transform: translate3d(-50%, -50%, 0);
+            }
+    
+            .demo .main-title {
+                text-transform: uppercase;
+                font-size: 4em;
+                letter-spacing: 0.1em;
+            }
+    
+            .main-title .thin {
+                font-weight: 200;
+            }
+            
+            @media only screen and (max-width: 700px) {
+                .demo .main-title {
+                    font-size: 3em;
+                }
+            }
+    
+        </style>
+    </head>
+    
+    <body>
+        <div class="container demo">
+            <div class="content">
+                <div id="large-header" class="large-header">
+                    <canvas id="demo-canvas">
+                    </canvas>
+                    <h1 class= "main-title"><span class="thin">Pollutant Standards Index (PSI)</span> Readings</h1>
+                </div>
+            </div>
+        </div>
+        <div class="main-body">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                           <p>Last Updated at <span id="time"></span></p>
+                        <div class="body">
+                            <div class="table-responsive" class="dataTables_wrapper">
+                                <div style="overflow-x:auto;">
+                                    <table class="table table-bordered table-striped table-hover centered responsive-table display">
+                                        <thread>
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>National</th>
+                                                <th>Central</th>
+                                                <th>West</th>
+                                                <th>East</th>
+                                                <th>North</th>
+                                                <th>South</th>
+                                            </tr>    
+                                        </thread>
+                                        <tbody id="table-body" class="display tbody"></tbody>
+                                    </table>    
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            (function($){
+                $(function(){
+                    $('.sidenav').sidenav();
+                });
+            })(jQuery);
+            $(function(){
+                $('.js-sample').DataTable({
+                    responsive: true
+                });
+            });
+    
+            $(document).ready(function(){
+                var table = $("#table-body");
+                $.ajax({
+                    url: 'https://api.data.gov.sg/v1/environment/psi',
+                    method: "GET",
+                    data: $('#psi-details').serialize(),
+                    dataType: "json",
+                    success: function(data){
+                        var timestamp = data.items[0].update_timestamp;
+                        timestamp = moment(timestamp).format("DD MMM YYYY, hh:mm a");
+                        document.getElementById("time").innerHTML = timestamp;
+                        var filteredData = data.items[0].readings;
+                        table.empty();
+                        $.each(filteredData, function(a,b){
+                            var text ="";
+                            table.append(
+                                "<tr><td>" + a + "</td>" +
+                                "<td>" + b.national + "</td>"+
+                                "<td>" + b.central + "</td>"+
+                                "<td>" + b.west+ "</td>"+
+                                "<td>" + b.east + "</td>"+
+                                "<td>" + b.north + "</td>"+
+                                "<td>" + b.south + "</td>"+
+                            text);   
+                        });
+                        $("#main-table").DataTable();
+                    }
+                });
+            });
+        </script> 
+    </body>
+</html>
